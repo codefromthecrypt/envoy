@@ -15,6 +15,7 @@
 #include "source/extensions/access_loggers/common/access_log_base.h"
 #include "source/extensions/access_loggers/open_telemetry/grpc_access_log_impl.h"
 #include "source/extensions/access_loggers/open_telemetry/substitution_formatter.h"
+#include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 
 #include "opentelemetry/proto/collector/logs/v1/logs_service.pb.h"
 #include "opentelemetry/proto/common/v1/common.pb.h"
@@ -37,7 +38,8 @@ public:
       ::Envoy::AccessLog::FilterPtr&& filter,
       envoy::extensions::access_loggers::open_telemetry::v3::OpenTelemetryAccessLogConfig config,
       ThreadLocal::SlotAllocator& tls, GrpcAccessLoggerCacheSharedPtr access_logger_cache,
-      const std::vector<Formatter::CommandParserPtr>& commands);
+      const std::vector<Formatter::CommandParserPtr>& commands,
+      Tracers::OpenTelemetry::ResourceConstSharedPtr detected_resource);
 
 private:
   /**

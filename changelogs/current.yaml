@@ -461,5 +461,27 @@ new_features:
     The filter extracts the ``method`` and ``id`` fields from incoming requests and stores them in dynamic metadata
     for use by downstream filters and access logging. Notifications (methods starting with ``notifications/``) are
     correctly handled as they don't have an ``id`` field per the JSON-RPC specification.
+- area: access_log
+  change: |
+    Added support for exporting OpenTelemetry access logs via HTTP and refactored the configuration
+    to match the tracer config pattern. New top-level fields ``http_service``, ``grpc_service``,
+    ``log_name``, ``buffer_flush_interval``, ``buffer_size_bytes``, ``filter_state_objects_to_log``,
+    and ``custom_tags`` provide a cleaner, transport-agnostic configuration.
+    The ``common_config`` field is deprecated but remains functional for backward compatibility.
+    See :ref:`http_service <envoy_v3_api_field_extensions.access_loggers.open_telemetry.v3.OpenTelemetryAccessLogConfig.http_service>`
+    and :ref:`grpc_service <envoy_v3_api_field_extensions.access_loggers.open_telemetry.v3.OpenTelemetryAccessLogConfig.grpc_service>`.
+- area: access_log
+  change: |
+    Added ``resource_detectors`` to the OpenTelemetry access logger configuration. This enables
+    consistent resource attribute configuration across all signals (tracing, metrics, access logs)
+    using the ``OTEL_RESOURCE_ATTRIBUTES`` environment variable via the environment resource detector.
+    See :ref:`resource_detectors
+    <envoy_v3_api_field_extensions.access_loggers.open_telemetry.v3.OpenTelemetryAccessLogConfig.resource_detectors>`.
 
 deprecated:
+- area: access_log
+  change: |
+    The ``common_config`` field in
+    :ref:`OpenTelemetryAccessLogConfig <envoy_v3_api_msg_extensions.access_loggers.open_telemetry.v3.OpenTelemetryAccessLogConfig>`
+    is deprecated. Use the new top-level fields ``grpc_service``, ``log_name``, ``buffer_flush_interval``,
+    ``buffer_size_bytes``, ``filter_state_objects_to_log``, and ``custom_tags`` instead.

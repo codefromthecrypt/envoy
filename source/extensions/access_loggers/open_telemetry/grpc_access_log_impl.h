@@ -11,6 +11,7 @@
 
 #include "source/common/protobuf/protobuf.h"
 #include "source/extensions/access_loggers/common/grpc_access_logger.h"
+#include "source/extensions/tracers/opentelemetry/resource_detectors/resource_detector.h"
 
 #include "opentelemetry/proto/collector/logs/v1/logs_service.pb.h"
 #include "opentelemetry/proto/common/v1/common.pb.h"
@@ -40,7 +41,8 @@ public:
       const Grpc::RawAsyncClientSharedPtr& client,
       const envoy::extensions::access_loggers::open_telemetry::v3::OpenTelemetryAccessLogConfig&
           config,
-      Event::Dispatcher& dispatcher, const LocalInfo::LocalInfo& local_info, Stats::Scope& scope);
+      Event::Dispatcher& dispatcher, const LocalInfo::LocalInfo& local_info, Stats::Scope& scope,
+      Tracers::OpenTelemetry::ResourceConstSharedPtr detected_resource);
 
 private:
   class OTelLogRequestCallbacks
@@ -84,7 +86,8 @@ private:
   void initMessageRoot(
       const envoy::extensions::access_loggers::open_telemetry::v3::OpenTelemetryAccessLogConfig&
           config,
-      const LocalInfo::LocalInfo& local_info);
+      const LocalInfo::LocalInfo& local_info,
+      Tracers::OpenTelemetry::ResourceConstSharedPtr detected_resource);
   // Extensions::AccessLoggers::GrpcCommon::GrpcAccessLogger
   void addEntry(opentelemetry::proto::logs::v1::LogRecord&& entry) override;
   // Non used addEntry method (the above is used for both TCP and HTTP).
@@ -117,6 +120,13 @@ public:
                             ThreadLocal::SlotAllocator& tls,
                             const LocalInfo::LocalInfo& local_info);
 
+  /**
+   * Sets the detected resource to be used when creating the next logger.
+   * This must be called before getOrCreateLogger on the same thread.
+   * Thread-safe since it uses thread-local storage.
+   */
+  void setDetectedResource(Tracers::OpenTelemetry::ResourceConstSharedPtr detected_resource);
+
 private:
   // Common::GrpcAccessLoggerCache
   GrpcAccessLoggerImpl::SharedPtr createLogger(
@@ -125,6 +135,8 @@ private:
       Event::Dispatcher& dispatcher) override;
 
   const LocalInfo::LocalInfo& local_info_;
+  // Thread-local storage for detected resource, set before getOrCreateLogger.
+  static thread_local Tracers::OpenTelemetry::ResourceConstSharedPtr tls_detected_resource_;
 };
 
 /**

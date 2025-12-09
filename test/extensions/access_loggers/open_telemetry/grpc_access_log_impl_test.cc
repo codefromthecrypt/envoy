@@ -102,9 +102,9 @@ public:
   envoy::extensions::access_loggers::open_telemetry::v3::OpenTelemetryAccessLogConfig config_;
 
   void setUpLogger() {
-    logger_ =
-        std::make_unique<GrpcAccessLoggerImpl>(Grpc::RawAsyncClientPtr{async_client_}, config_,
-                                               dispatcher_, local_info_, *stats_store_.rootScope());
+    logger_ = std::make_unique<GrpcAccessLoggerImpl>(Grpc::RawAsyncClientPtr{async_client_},
+                                                     config_, dispatcher_, local_info_,
+                                                     *stats_store_.rootScope(), nullptr);
   }
 };
 
